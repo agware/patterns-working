@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Revolve 3</title>
+
+    <style>
+
+        div {
+            float: left;
+        }
+
+        line {
+            stroke: #000;
+            stroke-width: 1px;
+            stroke-opacity: 0.1;
+        }
+
+        circle {
+            fill: #98d0ff;
+        }
+
+        .active {
+            stroke: #000;
+            stroke-opacity: 1;
+            stroke-width: 2px;
+        }
+
+        .hidden {
+            stroke-opacity: 0;
+        }
+
+
+    </style>
+
+</head>
+<body>
+
+<div id="animation"></div>
+<div id="control"></div>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type='text/javascript' src='sliders.js'></script>
+<script>
+
+    const height = 600;
+    const margin = 10;
+
+    const sections = 4;
+
+    let inputs = [{'id': 'skipLines', 'name': 'Skip Lines', 'val': 2, 'min': 0, 'max': 5},
+        {'id': 'noOfLines', 'name': 'No of Lines', 'val': 25, 'min': 10, 'max': 50},
+        {'id': 'speed', 'name': 'Speed', 'val': 5, 'min': 1, 'max': 10}];
+    let hiding = false;
+    let dragging = false;
+    let start = Date.now();
+    let count = 0;
+
+    initAnimation();
+    initSliders(inputs);
+
+    d3.timer(animate);
+
+    function initAnimation() {
+        let svg = d3.select('div#animation').append('svg')
+            .attr('height', height)
+            .attr('width', height);
+
+        svg.append('g')
+            .attr('transform', 'translate(' + (height/2) + ',' + (height/2) + ')')
+            .attr('id', 'lines');
+
+        d3.select('#lines').selectAll('line')
+            .data(d3.range(inputs[1].max*sections))
+            .enter()
+            .append('line')
+            .attr('id', function(d) {return 'line' + d; });
+
+        resetLines();
+    }
+
+    function animate() {
+        if (!dragging) {
+            let lineNum = inputs[1].val * sections;
+            let speed = inputs[2].val*lineNum/10;
+            let t = ((Date.now() - start) / 1000) % (lineNum);
+
+            while (count < (t*speed)) {
+                d3.select('#lines').selectAll('line')
+                    .classed('active', false);
+
+                let lineSelect = Math.floor(count % lineNum);
+                console.log(lineSelect);
+                d3.select('#line' + lineSelect)
+                    .classed('active', true)
+                    .classed('hidden', hiding);
+
+                if (lineSelect == 0) {
+                    hiding = !(d3.select('#line' + (lineNum - (inputs[0].val + 1))).classed('hidden'));
+                }
+                count += (inputs[0].val+1);
+            }
+        }
+    }
+
+    function resetLines() {
+        let gap = (height-margin)/(2*inputs[1].val);
+        d3.select('#lines').selectAll('line').classed('hidden', true);
+        for (let i = 0; i < inputs[1].val*sections; i++) {
+            d3.select('#line' + i)
+                .attr('x1', (inputs[1].val - i%inputs[1].val)*gap)
+                .attr('y2', (i%inputs[1].val)*gap)
+                .attr('transform', 'rotate(' + Math.floor(i/inputs[1].val)*(360/sections) + ')');
+        }
+        start = Date.now();
+        count = 0;
+        hiding = false;
+    }
+
+    function dragSlider(ball) {
+        let id = ball.attr('id');
+        id = id.substring(0, id.length - 4);
+        let index = -1;
+
+        switch(id) {
+            case inputs[0].id:
+                index = 0;
+                break;
+            case inputs[1].id:
+                index = 1;
+                break;
+            case inputs[2].id:
+                index = 2;
+                break;
+        }
+
+        let sliderScale = d3.scaleLinear()
+            .domain([0,100])
+            .range([inputs[index].min, inputs[index].max]);
+
+        inputs[index].val = Math.round(sliderScale(ball.attr('cx')));
+
+        resetLines();
+    }
+
+
+</script>
+</body>

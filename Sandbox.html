@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+
+        line {
+            stroke: #000;
+            stroke-width: 1px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+    const height = 400;
+    const margin = 20;
+    const sections = 4;
+    const lines = 10;
+    const gap = (height-margin)/(2*lines);
+
+    let svg = d3.select('body').append('svg')
+        .attr('height', height)
+        .attr('width', height);
+
+    let g = svg.append('g')
+        .attr('transform', 'translate(' + (height/2) + ',' + (height/2) + ')');
+
+    g.append('line')
+        .attr('x1', 200);
+
+    g.append('line')
+        .attr('x1', 200)
+        .attr('transform', 'rotate(90)');
+
+
+
+</script>
+
+</body>
+</html>
