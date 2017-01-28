@@ -13,7 +13,7 @@ function getTile1Data (g, r) {
 
     d3.selectAll('.construction').remove();
     let ret = ripLineData(g);
-    g.selectAll('line').remove();
+    g.remove();
 
     return ret;
 
@@ -98,7 +98,7 @@ function getTile2Data (g, r) {
 
     g.selectAll('.construction').remove();
     let ret = ripLineData(g);
-    g.selectAll('line').remove();
+    g.remove();
 
     return ret;
 

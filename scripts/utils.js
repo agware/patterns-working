@@ -94,9 +94,31 @@ function ripLineData (g) {
     return ret;
 }
 
-function generateUsingLineData (g, lineData) {
+function ripMultiGLineData (container) {
+    let layer = container.select('g:nth-child(1)');
+    let linesPerLayer = layer.selectAll('line').size();
+    let lineNum = container.selectAll('line').size();
+    let lineData = [];
 
-    g.selectAll('line')
+    for (let i = 0; i < lineNum; i++) {
+        let layer = Math.floor(i/linesPerLayer);
+        let layerG = container.select('g:nth-child(' + (layer+1) + ')');
+        let line = layerG.select('line:nth-child(' + ((i%linesPerLayer)+1) + ')');
+        let x1 = line.attr('x1');
+        let y1 = line.attr('y1');
+        let x2 = line.attr('x2');
+        let y2 = line.attr('y2');
+
+        lineData.push({'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2});
+    }
+    return lineData;
+}
+
+function generateUsingLineData (container, lineData) {
+
+    let layer = container.append('g');
+
+    layer.selectAll('line')
         .data(lineData)
         .enter().append('line')
         .attr('x1', function(d) {return d.x1})
@@ -105,6 +127,26 @@ function generateUsingLineData (g, lineData) {
         .attr('y2', function(d) {return d.y2})
         .classed('final', true);
 
+}
+
+function transitionUsingLineData (g, lineData) {
+
+    // ToDo: Hide/generate lines based on need
+    let lineNum = g.selectAll('line').size();
+
+    let lineNumNeeded = lineData.length;
+
+    for (let i = 0; i < lineNumNeeded; i++) {
+        let line = g.select('line:nth-child(' + (i+1) + ')');
+        let data = lineData[i];
+        line
+            .transition()
+            .duration(2000)
+            .attr('x1', data.x1)
+            .attr('y1', data.y1)
+            .attr('x2', data.x2)
+            .attr('y2', data.y2);
+    }
 }
 
 function getLineFormula (line) {

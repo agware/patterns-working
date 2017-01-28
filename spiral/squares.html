@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Squares</title>
+
+    <style>
+
+        line {
+            stroke: #000;
+            stroke-width: 2px;
+            stroke-opacity: 1;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../scripts/spiral.js" type="text/javascript"></script>
+<script>
+
+    const width = 620;
+    const height = 620;
+    const length = 100;
+    const tileAcross = 3;
+    const tileDown = 3;
+    const iterations = 60;
+
+    let svg = d3.select('body').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('overflow', 'hidden');
+
+    let g = svg.append('g')
+        .attr('transform', 'translate(' + (length + 10) + ',' + (length + 10) + ')');
+
+    for (let count = 0; count < tileAcross*tileDown; count++) {
+        let xOffset = 2*(count % tileAcross)*length;
+        let yOffset = 2*(Math.floor(count/tileDown))*length;
+
+        let container = g.append('g');
+
+        container.append('g').selectAll('line')
+            .data(d3.range(4))
+            .enter().append('line')
+            .attr('x1', function (d) {return xOffset + (Math.floor(d/2) ? -1 : 1)*length; })
+            .attr('y1', function (d) {return yOffset + (d % 3 ? -1 : 1)*length; })
+            .attr('x2', function (d) {return xOffset + (d % 3 ? -1 : 1)*length; })
+            .attr('y2', function (d) {return yOffset  + (Math.floor(d/2) ? 1 : -1)*length; });
+
+        spiral(container, iterations/(count%tileAcross + Math.floor(count/tileDown) + 3 ));
+    }
+
+</script>
+
+</body>
+</html>

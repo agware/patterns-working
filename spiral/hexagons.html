@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hexagons</title>
+
+    <style>
+
+        line {
+            stroke: #000;
+            stroke-width: 2px;
+            stroke-opacity: 1;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../scripts/spiral.js" type="text/javascript"></script>
+<script src="../scripts/twist.js" type="text/javascript"></script>
+<script src="../scripts/utils.js" type="text/javascript"></script>
+<script>
+
+    const width = 600;
+    const height = 600;
+    const length = 150;
+    const iterations = 12;
+    const duration = 800;
+
+    const tileAcross = 4;
+    const tileDown = 4;
+
+    let svg = d3.select('body').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('overflow', 'hidden');
+
+    let x = Math.round(length*Math.cos(30*Math.PI/180)*1000)/1000;
+    let y = Math.round(length*Math.sin(30*Math.PI/180)*1000)/1000;
+    let ySection = Math.round(2*y*Math.sin(30*Math.PI/180)*1000)/1000;
+
+    let g = svg.append('g');
+
+    let hexagon = [
+        {'x1': x, 'y1': -y, 'x2': 0, 'y2': -length},
+        {'x1': 0, 'y1': -length, 'x2': -x, 'y2': -y},
+        {'x1': -x, 'y1': -y, 'x2': -x, 'y2': y},
+        {'x1': -x, 'y1': y, 'x2': 0, 'y2': length},
+        {'x1': 0, 'y1': length, 'x2': x, 'y2': y},
+        {'x1': x, 'y1': y, 'x2': x, 'y2': -y}
+    ];
+
+    let lineData = [];
+
+    for (let count = 0; count < tileAcross*tileDown; count++) {
+        let xOffset = 2*(count % tileAcross)*x - (Math.floor(count/tileAcross) % 2)*x;
+        let yOffset = Math.floor(count/tileAcross)*(2*y + ySection);
+
+        let container = g.append('g')
+            .attr('id', 'container' + count)
+            .classed('container', true);
+
+        container.append('g').selectAll('line')
+            .data(hexagon)
+            .enter().append('line')
+            .attr('x1', function (d) {return xOffset + d.x1; })
+            .attr('y1', function (d) {return yOffset + d.y1; })
+            .attr('x2', function (d) {return xOffset + d.x2; })
+            .attr('y2', function (d) {return yOffset + d.y2; });
+
+        spiral(container, iterations);
+        lineData.push(ripMultiGLineData(d3.select('#container' + count)));
+    }
+
+    let start = Date.now() - (duration+100);
+    d3.timer(animate);
+
+    function animate() {
+        let t = (Date.now() - start)/(duration+200);
+        if(t > 1) {
+            for (let i = 0; i < d3.selectAll('.container').size(); i++) {
+                twist(d3.select('#container' + i), duration, lineData[i]);
+            }
+            start = Date.now();
+        }
+    }
+
+
+
+</script>
+
+</body>
+</html>

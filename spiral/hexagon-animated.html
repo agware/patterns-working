@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hexagons</title>
+
+    <style>
+
+        line {
+            stroke: #000;
+            stroke-width: 3px;
+            stroke-opacity: 1;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../scripts/spiral.js" type="text/javascript"></script>
+<script src="../scripts/twist.js" type="text/javascript"></script>
+<script src="../scripts/utils.js" type="text/javascript"></script>
+<script>
+
+    const width = 600;
+    const height = 600;
+    const length = 250;
+    const iterations = 20;
+    const duration = 400;
+
+    let svg = d3.select('body').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('overflow', 'hidden');
+
+    let x = Math.round(length*Math.cos(30*Math.PI/180)*1000)/1000;
+    let y = Math.round(length*Math.sin(30*Math.PI/180)*1000)/1000;
+
+    let g = svg.append('g')
+        .attr('transform', 'translate(' + width/2 + ',' + height/2 + ')');
+
+    let hexagon = [
+        {'x1': x, 'y1': -y, 'x2': 0, 'y2': -length},
+        {'x1': 0, 'y1': -length, 'x2': -x, 'y2': -y},
+        {'x1': -x, 'y1': -y, 'x2': -x, 'y2': y},
+        {'x1': -x, 'y1': y, 'x2': 0, 'y2': length},
+        {'x1': 0, 'y1': length, 'x2': x, 'y2': y},
+        {'x1': x, 'y1': y, 'x2': x, 'y2': -y}
+    ];
+
+    let container = g.append('g');
+
+    container.append('g').selectAll('line')
+        .data(hexagon)
+        .enter().append('line')
+        .attr('x1', function (d) {return d.x1; })
+        .attr('y1', function (d) {return d.y1; })
+        .attr('x2', function (d) {return d.x2; })
+        .attr('y2', function (d) {return d.y2; });
+
+    spiral(container, iterations);
+
+    let lineData = ripMultiGLineData(container);
+
+    let start = Date.now() - (duration+100);
+    d3.timer(animate);
+
+    function animate() {
+        let t = (Date.now() - start)/(duration+100);
+        if(t > 1) {
+            twist(container, duration, lineData);
+            start = Date.now();
+        }
+    }
+
+</script>
+
+</body>
+</html>
